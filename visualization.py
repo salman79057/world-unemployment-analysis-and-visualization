@@ -13,3 +13,10 @@ def plotBar(x, y):
     fig.add_trace( go.Bar( x = x , y = y ) )
 
     return fig
+
+def plotLine(x, y):
+    fig = go.Figure()
+
+    fig.add_trace( go.Line( x = x , y = y ) )
+
+    return fig

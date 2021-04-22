@@ -4,21 +4,17 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 import pandas as pd
 from database import Report
-from visualization import plot, plotBar
+from visualization import plot, plotBar, plotLine
 from AnalyseData import Analyse
 
 engine = create_engine('sqlite:///db.sqlite3')
 Session = sessionmaker(bind=engine)
 sess = Session()
 
-analysis = Analyse()
-
 st.title('Global Warming and Climate Change Analysis')
 sidebar = st.sidebar
 
 def viewForm():
-
-    st.plotly_chart(plot())
 
     title = st.text_input("Report Title")
     desc = st.text_area('Report Description')
@@ -30,9 +26,17 @@ def viewForm():
         sess.commit()
         st.success('Report Saved')
 
-def analyse():
-    data = analysis.getCategories()
-    st.plotly_chart(plotBar(data.index, data.values))
+def analyseByCountry():
+
+    analysis20 = Analyse('datasets/unemployment2020.csv')
+    selMonth = st.selectbox(options = list(analysis20.getDataset()['Month'].unique()), label="Select Month to Display")
+
+    # st.dataframe(analysis20.getDataset())
+
+    # selMonth = 'January'
+    data = analysis20.getCountrywise(selMonth)
+    st.plotly_chart(plotLine(data.index, data.values.flatten()))
+
 
 def viewReport():
     reports = sess.query(Report).all()
@@ -50,10 +54,10 @@ def viewReport():
     st.markdown(markdown)
 
 sidebar.header('Choose Your Option')
-options = [ 'View Database', 'Analyse', 'View Report' ]
+options = [ 'View Database', 'Analyse Unemployment By Country', 'View Report' ]
 choice = sidebar.selectbox( options = options, label="Choose Action" )
 
 if choice == options[1]:
-    viewForm()
+    analyseByCountry()
 elif choice == options[2]:
     analyse()
