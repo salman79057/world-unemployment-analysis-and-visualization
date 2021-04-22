@@ -11,7 +11,7 @@ engine = create_engine('sqlite:///db.sqlite3')
 Session = sessionmaker(bind=engine)
 sess = Session()
 
-st.title('Global Warming and Climate Change Analysis')
+st.title('World Unemployment Analysis and Visualization')
 sidebar = st.sidebar
 
 def viewForm():
@@ -30,12 +30,15 @@ def analyseByCountry():
 
     analysis20 = Analyse('datasets/unemployment2020.csv')
     selMonth = st.selectbox(options = list(analysis20.getDataset()['Month'].unique()), label="Select Month to Display")
-
+    chartType = st.selectbox(options = ['Bar', 'Line'], label = 'Select Chart Type')
     # st.dataframe(analysis20.getDataset())
 
     # selMonth = 'January'
     data = analysis20.getCountrywise(selMonth)
-    st.plotly_chart(plotLine(data.index, data.values.flatten()))
+    if chartType == 'Line' : 
+        st.plotly_chart(plotLine(data.index, data.values.flatten()))
+    elif chartType == 'Bar' : 
+        st.plotly_chart(plotBar(data.index, data.values.flatten()))
 
 
 def viewReport():
