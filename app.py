@@ -13,7 +13,7 @@ sess = Session()
 
 analysis = Analyse()
 
-st.title('Global Warming and Climate Change Analysis')
+st.title('World Unemployment Analysis and Visulization')
 sidebar = st.sidebar
 
 def viewForm():
