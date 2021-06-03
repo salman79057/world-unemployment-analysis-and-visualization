@@ -1,5 +1,6 @@
 import pandas as pd
 
+
 class Analyse:
 
     def __init__(self, path):
@@ -9,10 +10,13 @@ class Analyse:
 
     def cleanData2020(self):
         self.df.columns = [col.title() for col in self.df.columns.values]
-        self.df.rename(columns={'Subject' : 'Gender', 'Value' : 'Unemployment Rate'}, inplace=True)
-        self.df.drop(columns=['Indicator', 'Measure', 'Flag Codes', 'Frequency'], inplace=True)
+        self.df.rename(columns={'Subject': 'Gender',
+                                'Value': 'Unemployment Rate'}, inplace=True)
+        self.df.drop(columns=['Indicator', 'Measure',
+                              'Flag Codes', 'Frequency'], inplace=True)
         self.df['Month'] = ""
-        Months = ['January','February','March','April','May','June','July','August','September','October']
+        Months = ['January', 'February', 'March', 'April', 'May',
+                  'June', 'July', 'August', 'September', 'October']
 
         month = []
 
@@ -44,11 +48,12 @@ class Analyse:
 
         self.df.tail(5)
 
+    def getDataframe(self):
+        return self.df
+
     def getCategories(self):
         return self.df.groupby('Category').count().sort_values('App')['App'][::-1]
 
     def getCountrywise(self, month):
-        return self.df[self.df['Month'] == month].groupby('Location').sum().sort_values('Unemployment Rate', ascending = False)
+        return self.df[self.df['Month'] == month].groupby('Location').sum().sort_values('Unemployment Rate', ascending=False)
 
-    def getDataset(self):
-        return self.df

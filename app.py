@@ -4,7 +4,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 import pandas as pd
 from database import Report
-from visualization import plot, plotBar, plotLine
+from visualization import *
 from AnalyseData import Analyse
 
 engine = create_engine('sqlite:///db.sqlite3')
@@ -14,53 +14,92 @@ sess = Session()
 st.title('World Unemployment Analysis and Visualization')
 sidebar = st.sidebar
 
-def viewForm():
 
-    title = st.text_input("Report Title")
-    desc = st.text_area('Report Description')
-    btn = st.button("Submit")
+# @st.cache(suppress_st_warning=True)
+def loadIndiaData():
+    return Analyse('datasets/india.csv')
 
-    if btn:
-        report1 = Report(title = title, desc = desc, data = "")
-        sess.add(report1)
-        sess.commit()
-        st.success('Report Saved')
+
+# @st.cache(suppress_st_warning=True)
+def loadWorldData():
+    return Analyse('datasets/unemployment.csv')
+
+
+# @st.cache(suppress_st_warning=True)
+def load2020Data():
+    return Analyse('datasets/unemployment2020.csv')
+
+
+analysis20 = loadIndiaData()
+analysis = loadWorldData()
+analysisIndia = loadIndiaData()
+
+
+def overview():
+    st.header("Project Overview Here")
+    st.markdown("""
+        # This is Heading 1
+        ## heading 2
+        
+    """)
+    st.image('logo.jpg')
+    st.subheader('ksjhdkj')
+
+
+def viewDataset():
+    st.header('Data Used in Project')
+    dataframe = analysis20.getDataframe()
+
+    with st.spinner("Loading Data..."):
+        st.dataframe(dataframe)
+
+        st.markdown('---')
+        cols = st.beta_columns(4)
+        cols[0].markdown("### No. of Rows :")
+        cols[1].markdown(f"# {dataframe.shape[0]}")
+        cols[2].markdown("### No. of Columns :")
+        cols[3].markdown(f"# {dataframe.shape[1]}")
+        st.markdown('---')
+
+        st.header('Summary')
+        st.dataframe(dataframe.describe())
+        st.markdown('---')
+
+        types = {'object': 'Categorical',
+                 'int64': 'Numerical', 'float64': 'Numerical'}
+        types = list(map(lambda t: types[str(t)], dataframe.dtypes))
+        st.header('Dataset Columns')
+        for col, t in zip(dataframe.columns, types):
+            st.markdown(f"### {col}")
+            cols = st.beta_columns(4)
+            cols[0].markdown('#### Unique Values :')
+            cols[1].markdown(f"# {dataframe[col].unique().size}")
+            cols[2].markdown('#### Type :')
+            cols[3].markdown(f"## {t}")
+
 
 def analyseByCountry():
 
-    analysis20 = Analyse('datasets/unemployment2020.csv')
-    selMonth = st.selectbox(options = list(analysis20.getDataset()['Month'].unique()), label="Select Month to Display")
-    chartType = st.selectbox(options = ['Bar', 'Line'], label = 'Select Chart Type')
-    # st.dataframe(analysis20.getDataset())
+    st.header('Analysis By Country')
+    selMonth = st.selectbox(options=list(analysis20.getDataframe()[
+                            'Month'].unique()), label="Select Month to Display")
+    chartType = st.selectbox(
+        options=['Bar', 'Line'], label='Select Chart Type')
 
-    # selMonth = 'January'
     data = analysis20.getCountrywise(selMonth)
-    if chartType == 'Line' : 
+    if chartType == 'Line':
         st.plotly_chart(plotLine(data.index, data.values.flatten()))
-    elif chartType == 'Bar' : 
+    elif chartType == 'Bar':
         st.plotly_chart(plotBar(data.index, data.values.flatten()))
 
 
-def viewReport():
-    reports = sess.query(Report).all()
-    titlesList = [ report.title for report in reports ]
-    selReport = st.selectbox(options = titlesList, label="Select Report")
-    
-    reportToView = sess.query(Report).filter_by(title = selReport).first()
-
-    markdown = f"""
-        ## {reportToView.title}
-        ### {reportToView.desc}
-        
-    """
-
-    st.markdown(markdown)
-
 sidebar.header('Choose Your Option')
-options = [ 'View Database', 'Analyse Unemployment By Country', 'View Report' ]
-choice = sidebar.selectbox( options = options, label="Choose Action" )
+options = ['Overview', 'View Dataset', 'Analyse Unemployment By Country']
+choice = sidebar.selectbox(options=options, label="Choose Action")
 
+if choice == options[0]:
+    overview()
 if choice == options[1]:
-    analyseByCountry()
+    viewDataset()
 elif choice == options[2]:
-    analyse()
+    analyseByCountry()
