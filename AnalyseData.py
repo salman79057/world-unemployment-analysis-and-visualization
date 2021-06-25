@@ -5,7 +5,7 @@ class Analyse:
 
     def __init__(self, path):
         self.df = pd.read_csv(path)
-        if(path == 'datasets/unemployment2020.csv'):
+        if path.endswith('2020.csv'):
             self.cleanData2020()
 
     def cleanData2020(self):
@@ -57,3 +57,8 @@ class Analyse:
     def getCountrywise(self, month):
         return self.df[self.df['Month'] == month].groupby('Location').sum().sort_values('Unemployment Rate', ascending=False)
 
+    def getLocations(self):
+        return self.df['Location'].unique()
+
+    def getLocationData(self, loc):
+        return self.df[self.df['Location'] == loc].set_index('Time')['Unemployment Rate']
